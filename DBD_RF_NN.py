@@ -371,8 +371,18 @@ if gdf.crs is None:
     gdf = gdf.set_crs(epsg=4326)
 
 # Convert geometries to lat/lon for plotting with plotly
-gdf['lon'] = gdf.centroid.x
-gdf['lat'] = gdf.centroid.y
+# Reproject to a suitable projected CRS (e.g., UTM zone 48N)
+gdf_projected = gdf.to_crs(epsg=32648)
+
+# Calculate centroids
+gdf_projected['centroid'] = gdf_projected.centroid
+gdf_projected['lon'] = gdf_projected.centroid.x
+gdf_projected['lat'] = gdf_projected.centroid.y
+
+# If needed, reproject centroids back to geographic CRS
+gdf_centroid_geo = gdf_projected.to_crs(epsg=4326)
+gdf['lon'] = gdf_centroid_geo.centroid.x
+gdf['lat'] = gdf_centroid_geo.centroid.y
 
 # Define color conditions based on 'AI' values
 gdf['color'] = gdf['Color']
